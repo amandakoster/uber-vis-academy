@@ -133,9 +133,9 @@
                 "type": "sequential",
                 "category": "Uber",
                 "colors": [
-                  "#5A1846",
-                  "#900C3F",
-                  "#C70039",
+                  "red",
+                  "red",
+                  "red",
                   "#E3611C",
                   "#F1920E",
                   "#FFC300"

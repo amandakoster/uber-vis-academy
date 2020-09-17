@@ -18,22 +18,85 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import AutoSizer from "react-virtualized/dist/commonjs/AutoSizer";
+import KeplerGl from "kepler.gl";
+import nycTrips from "./data/nyc-trips.csv";
+import nycTripsSubset from "./data/nyc-subset.csv";
+import nyConfig from "./data/nyc-config.json";
+import { addDataToMap } from "kepler.gl/actions";
+import Processors from "kepler.gl/processors";
+import KeplerGlSchema from "kepler.gl/schemas";
+import Button from "./button";
+import downloadJsonFile from "./file-download";
 
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 class App extends Component {
+  componentDidMount() {
+    const data = Processors.processCsvData(nycTrips);
+    const dataset = {
+      data,
+      info: {
+        id: "my-data",
+      },
+    };
+
+    this.props.dispatch(addDataToMap({ datasets: dataset, config: nyConfig }));
+  }
+
+  getMapConfig = () => {
+    const { keplerGl } = this.props;
+    const { map } = keplerGl;
+    return KeplerGlSchema.getConfigToSave(map);
+  };
+
+  exportMapConfig = () => {
+    const mapConfig = this.getMapConfig();
+    downloadJsonFile(mapConfig, "kepler.gl.json");
+  };
+
+  replaceData = () => {
+    const data = Processors.processCsvData(nycTripsSubset);
+    const dataset = {
+      data,
+      info: {
+        id: "my_data",
+      },
+    };
+    const config = this.getMapConfig();
+    this.props.dispatch(addDataToMap({ datasets: dataset, config }));
+  };
+
   render() {
     return (
-      <div style={{position: 'absolute', width: '100%', height: '100%', minHeight: '70vh'}}>
-        <h2>Kepler.Gl Code Lab!</h2>
+      <div
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          minHeight: "70vh",
+        }}
+      >
+        <Button onClick={this.exportMapConfig}>Export Config</Button>
+        <Button onClick={this.replaceData}>Replace Data</Button>
+        <AutoSizer>
+          {({ height, width }) => (
+            <KeplerGl
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+              id="map"
+              width={width}
+              height={height}
+            />
+          )}
+        </AutoSizer>
       </div>
     );
   }
 }
 
-const mapStateToProps = state => state;
-const dispatchToProps = dispatch => ({dispatch});
+const mapStateToProps = (state) => state;
+const dispatchToProps = (dispatch) => ({ dispatch });
 
 export default connect(mapStateToProps, dispatchToProps)(App);

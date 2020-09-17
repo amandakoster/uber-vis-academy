@@ -21,6 +21,7 @@
 import {combineReducers} from 'redux';
 import {handleActions} from 'redux-actions';
 import {routerReducer} from 'react-router-redux';
+import keplerGlReducer from 'kepler.gl/reducers';
 
 // INITIAL_APP_STATE
 const initialAppState = {
@@ -29,6 +30,7 @@ const initialAppState = {
 };
 
 const reducers = combineReducers({
+  keplerGl: keplerGlReducer,
   app: handleActions({
     // you can put your app reducer here
   }, initialAppState),
